@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   let renderer, scene, camera, controls, host, clock, sunLight, hemi, sunMesh, sunGlow, stars, ground, plane, props = [], flows = [], rays, batMesh;
-  let data = null, playing = false, speed = 1800, simT = 0, idx = 0, onFrame = null, ready = false, peakSun = 1, peakReq = 1, orbitR = 26;
+  let data = null, playing = false, speed = 1800, simT = 0, idx = 0, onFrame = null, ready = false, peakSun = 1, peakReq = 1, travel = 0, pitch = 0;
   let DAY, DUSK, NIGHT;
 
   function init(el) {
@@ -86,7 +86,6 @@
     const rg = new THREE.BufferGeometry(); rg.setAttribute('position', new THREE.BufferAttribute(new Float32Array(120 * 3), 3));
     rays = new THREE.Points(rg, new THREE.PointsMaterial({ color: 0xffb020, size: 0.18, transparent: true, opacity: 0.85, depthWrite: false })); scene.add(rays);
     rays.userData = { seeds: Array.from({ length: 120 }, () => ({ u: Math.random(), z: (Math.random() - 0.5) * span * 0.9, x: (Math.random() - 0.5) * chord })) };
-    orbitR = Math.max(26, span * 2.2);
   }
 
   function load(result) {
@@ -94,7 +93,7 @@
     data = result.series;
     build(result.geometry);
     peakSun = Math.max(1, ...data.p_solar); peakReq = Math.max(1, ...data.p_req);
-    simT = 0; idx = 0;
+    simT = 0; idx = 0; travel = 0; pitch = 0;
     update();
     const p = plane.position; camera.position.set(p.x - 30, p.y + 14, p.z + 34); if (controls) controls.target.copy(p);
   }
@@ -113,17 +112,25 @@
     const sky = NIGHT.clone().lerp(DAY, day).lerp(DUSK, dusk * 0.55 * (1 - day * 0.5));
     scene.background = sky; scene.fog.color = sky; hemi.intensity = 0.15 + 0.6 * day;
     stars.material.opacity = 1 - day;
-    const prev = plane.position.clone();
-    const ang = (simT / 3600) * 2 * Math.PI * 1.2;
-    plane.position.set(Math.cos(ang) * orbitR, 12 + data.alt[i] * 0.0025 + 0.004 * Math.min(data.alt[i], 2000), Math.sin(ang) * orbitR);
-    plane.rotation.set(0, -ang - Math.PI / 2 + Math.PI, 0.22);
-    plane.rotateZ(data.mode[i] === 'climb' ? 0.1 : data.mode[i] === 'glide' ? -0.08 : 0);
-    const d = plane.position.clone().sub(prev); camera.position.add(d); if (controls) controls.target.add(d);
+    placePlane();
     if (onFrame) onFrame(i, simT / 3600);
+  }
+
+  function placePlane() {
+    if (!plane || !data) return;
+    const i = idx;
+    const prev = plane.position.clone();
+    plane.position.set(travel, 12 + data.alt[i] * 0.0025 + 0.004 * Math.min(data.alt[i], 2000), 0);
+    const target = data.mode[i] === 'climb' ? 0.09 : data.mode[i] === 'glide' ? -0.07 : 0;
+    pitch += (target - pitch) * 0.05;
+    plane.rotation.set(0, 0, pitch);
+    const d = plane.position.clone().sub(prev); camera.position.add(d); if (controls) controls.target.add(d);
+    ground.position.x = Math.floor(travel / 100) * 100;
   }
 
   function tick(dt) {
     if (!renderer) return;
+    if (data && plane) { travel += Math.min(dt, 0.1) * 7; placePlane(); }
     if (data && playing) { simT += dt * speed; const end = data.t_h[data.t_h.length - 1] * 3600; if (simT >= end) { simT = end; playing = false; if (window.SolScene.onEnd) window.SolScene.onEnd(); } update(); }
     if (data && plane) {
       const i = idx, ps = data.p_solar[i] / peakSun, pr = data.p_prop[i] / Math.max(1, Math.max(...[peakReq])), net = data.p_solar[i] - data.p_req[i];
