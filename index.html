@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SOLARIS – Solar Aircraft & Drone Design Studio</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☀️</text></svg>">
+<style>
+:root{color-scheme:dark;--bg:#070b18;--p1:rgba(20,28,56,.72);--p2:rgba(28,38,74,.75);--ln:rgba(120,150,230,.18);--tx:#e6ecff;--mu:#8e9bc4;--h2:#4dd8ff;--fc:#5cff9d;--bat:#ffc24d;--bus:#c79bff;--sun:#ffd24d;--panel:#4c7de8;--bad:#ff5d73;--ok:#5cff9d}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;color:var(--tx);font:13px/1.45 Inter,'Segoe UI',Roboto,Arial,sans-serif;background:radial-gradient(1100px 650px at 90% -15%,#5a3a12 0,transparent 55%),radial-gradient(900px 600px at -10% 110%,#0f2a5a 0,transparent 55%),var(--bg)}
+button,select,input{font:inherit;color:var(--tx)}
+header{display:flex;align-items:center;gap:14px;height:62px;padding:0 20px;border-bottom:1px solid var(--ln);background:rgba(8,12,28,.6);backdrop-filter:blur(10px);position:sticky;top:0;z-index:5}
+.logo{font-weight:800;font-size:22px;letter-spacing:.5px;background:linear-gradient(90deg,#ffd24d,#ff9a3d 45%,#4c7de8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mu);font-size:12px}
+.sp{flex:1}
+.seg{display:flex;background:rgba(10,16,36,.8);border:1px solid var(--ln);border-radius:10px;padding:3px}
+.seg button{border:0;background:transparent;padding:7px 14px;border-radius:7px;cursor:pointer;color:var(--mu);font-weight:600}
+.seg button.on{background:linear-gradient(135deg,#25407f,#1b2d5c);color:#fff;box-shadow:0 0 0 1px rgba(120,160,255,.35) inset}
+select,input[type=number],input[type=text]{background:rgba(8,12,30,.85);border:1px solid var(--ln);border-radius:7px;padding:6px 8px}
+.btn{background:rgba(40,60,120,.55);border:1px solid rgba(120,160,255,.35);border-radius:8px;padding:7px 14px;cursor:pointer;font-weight:600}
+.btn:hover{background:rgba(60,90,170,.6)}
+.btn.go{background:linear-gradient(135deg,#ffd24d,#ff9a3d);color:#06101e;border:0}
+main{display:flex;height:calc(100% - 62px)}
+aside{width:330px;flex-shrink:0;overflow:auto;padding:14px;border-right:1px solid var(--ln);background:rgba(8,12,28,.45)}
+.grp{background:var(--p1);border:1px solid var(--ln);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.grp h3{margin:0;padding:10px 12px;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:#aebdf0;cursor:pointer;display:flex;justify-content:space-between}
+.grp .body{padding:4px 12px 10px}
+.grp.closed .body{display:none}
+.fld{display:flex;align-items:center;gap:8px;margin:5px 0}
+.fld label{flex:1;color:var(--mu);font-size:12px}
+.fld input,.fld select{width:108px;text-align:right}
+.fld .u{width:44px;color:#6f7db0;font-size:11px}
+.desc{color:var(--mu);font-size:12px;margin:2px 0 10px}
+section.work{flex:1;min-width:0;overflow:auto;padding:16px 18px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--p2);border:1px solid var(--ln);border-radius:14px;padding:12px 14px;position:relative;overflow:hidden}
+.kpi:after{content:'';position:absolute;inset:auto -30px -40px auto;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle,rgba(77,216,255,.18),transparent 70%)}
+.kpi span{color:var(--mu);font-size:11px;text-transform:uppercase;letter-spacing:.8px}
+.kpi b{display:block;font-size:24px;font-weight:800;margin-top:2px}
+.kpi small{color:var(--mu)}
+.pill{display:inline-block;padding:3px 10px;border-radius:20px;font-weight:700;font-size:12px}
+.pill.ok{background:rgba(92,255,157,.15);color:var(--ok);border:1px solid rgba(92,255,157,.4)}
+.pill.bad{background:rgba(255,93,115,.15);color:var(--bad);border:1px solid rgba(255,93,115,.4)}
+.flags{color:var(--bad);font-size:12px;margin:-6px 0 10px}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px}
+.tab{padding:8px 14px;border-radius:9px;cursor:pointer;color:var(--mu);border:1px solid transparent;font-weight:600}
+.tab.on{background:var(--p2);color:#fff;border-color:var(--ln)}
+.pane{display:none}.pane.on{display:block}
+.card{background:var(--p1);border:1px solid var(--ln);border-radius:14px;padding:14px;margin-bottom:14px;position:relative}
+.card h2{margin:0 0 8px;font-size:14px}.card h2 small{color:var(--mu);font-weight:400}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(460px,1fr));gap:14px}
+.chart{position:relative}
+.chart svg{display:block;overflow:visible}
+.chart .gl{stroke:rgba(140,165,240,.12)}.chart .tl{fill:#7f8db8;font-size:11px}.chart .al{fill:#9aa8d4;font-size:11px}.chart .lg{fill:#cfd8ff;font-size:11px}.chart .lg2{fill:#cfd8ff;font-size:12px}.chart .cl{fill:#7f8db8;font-size:10px}.chart .bv{fill:#fff;font-size:12px;font-weight:700}.chart .dv{fill:#fff;font-size:22px;font-weight:800}.chart .xh{stroke:#c79bff;stroke-dasharray:3 3}
+.tip{position:absolute;display:none;pointer-events:none;background:rgba(8,12,30,.95);border:1px solid var(--ln);border-radius:8px;padding:6px 9px;font-size:12px;z-index:3;min-width:150px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;color:#9fb0e6;font-size:11px;font-weight:600;padding:6px 8px;border-bottom:1px solid var(--ln)}
+td{padding:6px 8px;border-bottom:1px solid rgba(120,150,230,.08)}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+.pass{color:var(--ok);font-weight:700}.fail{color:var(--bad);font-weight:700}
+.ebar{display:flex;height:34px;border-radius:9px;overflow:hidden;border:1px solid var(--ln)}
+.ebar div{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#06101e;white-space:nowrap;overflow:hidden}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;color:var(--mu);font-size:12px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}
+#v3{position:relative;height:560px;border-radius:14px;overflow:hidden;border:1px solid var(--ln)}
+#hud{position:absolute;left:14px;top:14px;background:rgba(6,10,26,.78);border:1px solid var(--ln);border-radius:12px;padding:10px 14px;min-width:230px;backdrop-filter:blur(6px);font-variant-numeric:tabular-nums}
+#hud .r{display:flex;justify-content:space-between;gap:14px;margin:2px 0}#hud .r span{color:var(--mu)}
+.bar{height:7px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;margin:3px 0 6px}.bar div{height:100%}
+#ctrl{position:absolute;left:14px;right:14px;bottom:14px;display:flex;gap:10px;align-items:center;background:rgba(6,10,26,.78);border:1px solid var(--ln);border-radius:12px;padding:8px 12px}
+#ctrl input[type=range]{flex:1}
+#legend3d i{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:middle}
+#legend3d{position:absolute;right:14px;top:14px;background:rgba(6,10,26,.78);border:1px solid var(--ln);border-radius:12px;padding:8px 12px;font-size:12px}
+.nogl{padding:40px;color:var(--mu)}
+#boot{position:fixed;inset:0;background:rgba(5,8,20,.92);z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+#boot .ring{width:64px;height:64px;border-radius:50%;border:3px solid rgba(77,216,255,.15);border-top-color:var(--sun);border-right-color:var(--panel);animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#busy{position:fixed;right:18px;bottom:18px;background:var(--p2);border:1px solid var(--ln);border-radius:10px;padding:8px 14px;display:none;z-index:20}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+@media (max-width:980px){main{flex-direction:column;height:auto}aside{width:auto;border-right:0}.g2{grid-template-columns:1fr}header{height:auto;flex-wrap:wrap;padding:10px}.sub{display:none}}
+</style>
+</head>
+<body>
+<div id="boot"><div class="ring"></div><div class="logo">SOLARIS</div><div id="bootTxt" class="sub">Loading the Python engine (about 10 MB, first visit only) …</div></div>
+<header>
+<div class="logo">☀ SOLARIS</div>
+<div class="sub">Solar aircraft &amp; drone design studio · physics engine in Python</div>
+<div class="sp"></div>
+<select id="preset"></select>
+<button class="btn" id="btnExport">Export</button>
+<button class="btn" id="btnImport">Import</button>
+<input type="file" id="fileIn" accept=".json" style="display:none">
+</header>
+<main>
+<aside><div class="desc" id="pdesc"></div><div id="form"></div></aside>
+<section class="work">
+<div class="kpis" id="kpis"></div>
+<div class="flags" id="flags"></div>
+<div class="tabs" id="tabs">
+<div class="tab on" data-t="mission">24 h Mission</div>
+<div class="tab" data-t="flight">3D Flight</div>
+<div class="tab" data-t="mass">Mass &amp; Energy</div>
+<div class="tab" data-t="space">Design Space</div>
+<div class="tab" data-t="season">Season Map</div>
+<div class="tab" data-t="size">Sizing</div>
+<div class="tab" data-t="copter">Multicopter</div>
+<div class="tab" data-t="val">Validation</div>
+<div class="tab" data-t="about">Model</div>
+</div>
+<div class="pane on" id="p-mission">
+<div class="card"><h2>Power balance <small>– solar power vs. required power</small></h2><div class="chart" id="cPow"></div></div>
+<div class="g2"><div class="card"><h2>Battery state of charge</h2><div class="chart" id="cSoc"></div></div><div class="card"><h2>Altitude <small>– energy stored as height</small></h2><div class="chart" id="cAlt"></div></div></div>
+<div class="g2"><div class="card"><h2>Solar irradiance &amp; sun elevation</h2><div class="chart" id="cIrr"></div></div><div class="card"><h2>Daily energy budget</h2><div id="eBud"></div></div></div>
+</div>
+<div class="pane" id="p-flight">
+<div id="v3" style="height:600px"><div id="hud"></div><div id="legend3d"><div><i style="background:var(--sun)"></i>&nbsp;sunlight</div><div><i style="background:var(--fc)"></i>&nbsp;charging</div><div><i style="background:var(--bus)"></i>&nbsp;battery → motor</div></div>
+<div id="ctrl"><button class="btn" id="bPlay">▶ Play</button><select id="bSpeed"><option value="600">10 min/s</option><option value="1800" selected>30 min/s</option><option value="3600">1 h/s</option><option value="10800">3 h/s</option></select><input type="range" id="bSeek" min="0" max="1000" value="0"><span id="bTime" class="sub"></span></div></div>
+</div>
+<div class="pane" id="p-mass"><div class="g2"><div class="card"><h2>Mass breakdown</h2><div class="chart" id="cMass"></div></div><div class="card"><h2>Key figures</h2><div id="tKey"></div></div></div></div>
+<div class="pane" id="p-space"><div class="card"><h2>Design space <small>– energy margin over wingspan and battery mass (green = perpetual flight, white line = boundary)</small></h2><div class="row"><label class="sub">span</label><input type="number" id="dS0" style="width:80px"><span class="sub">to</span><input type="number" id="dS1" style="width:80px"><span class="sub">m · battery</span><input type="number" id="dB0" style="width:80px"><span class="sub">to</span><input type="number" id="dB1" style="width:80px"><span class="sub">kg · grid</span><input type="number" id="dN" value="14" style="width:60px"><button class="btn go" id="dRun">Compute</button></div><div class="chart" id="cSpace" style="margin-top:12px"></div></div></div>
+<div class="pane" id="p-season"><div class="card"><h2>Where and when is perpetual flight possible? <small>– energy margin over day of year and latitude</small></h2><button class="btn go" id="mRun">Compute season map</button><div class="chart" id="cSeason" style="margin-top:12px"></div></div></div>
+<div class="pane" id="p-size"><div class="card"><h2>Smallest aircraft for perpetual flight <small>– minimum wingspan with the optimal battery for the chosen date and latitude</small></h2><button class="btn go" id="sRun">Size</button> <button class="btn" id="sApply" disabled>Apply to model</button><div id="sOut" style="margin-top:12px"></div></div></div>
+<div class="pane" id="p-copter"><div class="g2"><div class="card"><h2>Multicopter</h2><div id="cForm"></div><button class="btn go" id="cRun" style="margin-top:8px">Compute</button><div id="cKpi" style="margin-top:12px"></div></div><div class="card"><h2>Power and range vs. speed</h2><div class="chart" id="cCop"></div></div></div><div class="card"><h2>Hover endurance vs. payload</h2><div class="chart" id="cPay"></div></div></div>
+<div class="pane" id="p-val"><div class="card"><h2>Validation suite <small>– runs the Python checks in your browser</small></h2><button class="btn go" id="vRun">Run validation</button><div id="vOut" style="margin-top:12px"></div></div></div>
+<div class="pane" id="p-about"><div class="card" id="about"></div></div>
+</section>
+</main>
+<div id="busy">⏳ <span id="busyTxt">Computing …</span></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/scene3d.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
